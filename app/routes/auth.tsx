@@ -1,0 +1,11 @@
+export const meta = () => ([
+  {'title'}
+])
+
+const auth = () => {
+  return (
+    <div>auth</div>
+  )
+}
+
+export default auth
