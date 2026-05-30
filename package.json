@@ -4,16 +4,17 @@
   "type": "module",
   "scripts": {
     "build": "react-router build",
-    "dev": "react-router dev",
+    "dev": "copy node_modules\\pdfjs-dist\\build\\pdf.worker.min.mjs public\\ && react-router dev",
     "start": "react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc"
+    "typecheck": "react-router typegen && tsc",
+    "postinstall": "copy node_modules\\pdfjs-dist\\build\\pdf.worker.min.mjs public\\"
   },
   "dependencies": {
     "@react-router/node": "7.15.1",
     "@react-router/serve": "7.15.1",
     "clsx": "^2.1.1",
     "isbot": "^5.1.36",
-    "pdfjs-dist": "^5.7.284",
+    "pdfjs-dist": "^4.10.38",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-dropzone": "^15.0.0",
