@@ -1,8 +1,16 @@
 import React, { useState, type FormEvent } from 'react'
+import { useNavigate } from 'react-router';
 import FileUploader from '~/components/FileUploader';
 import Navbar from '~/components/Navbar'
+import { convertPdfToImage } from '~/lib/pdf2image';
+import { usePuterStore } from '~/lib/puter';
+import { generateUUID } from '~/lib/utils';
 
 const upload = () => {
+
+  const{auth,isLoading,fs,ai,kv} = usePuterStore();
+
+  const navigate = useNavigate();
 
   const[isProcessing, setIsProcessing] = useState(false);
 
@@ -14,21 +22,53 @@ const upload = () => {
     setFile(file)
   }
 
+  const handleAnalyze = async({companyName,jobTitle,jobDescription,file}:{companyName:string,
+     jobTitle:string, jobDescription:string, file:File}) =>{
+      setIsProcessing(true);
+      setStatusText('Uploading the file...');
+
+      const uploadedFile = await fs.upload([file])
+
+      if(!uploadedFile) return setStatusText('Error: fail to upload file');
+
+      setStatusText('Converting to image...');
+
+      const imageFile = await convertPdfToImage(file)
+
+      if(!imageFile.file) return setStatusText('Error: fail to convert to image');
+
+      setStatusText('uploading the image.....');
+
+      const uploadingImage = await fs.upload([imageFile.file]);
+
+      if(!uploadingImage) return setStatusText('Error: fail to upload image');
+
+      setStatusText('preparing data....');
+
+      const uuid = generateUUID();
+
+      const data = {
+        id: uuid,
+        resumePath: uploadedFile.path,
+        imagePath: uploadingImage.path,
+        companyName,jobTitle,jobDescription,
+        feedBack: '',
+      }
+     }
+
   const handleSubmit = (e:FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget.closest('form');
     if(!form) return;
     const formData = new FormData(form);
 
-    const companyName = formData.get('company-name');
-    const jobTitle = formData.get('job-title');
-    const jobDescription = formData.get('job-description');
+    const companyName = formData.get('company-name') as string;
+    const jobTitle = formData.get('job-title') as string;
+    const jobDescription = formData.get('job-description') as string;
 
-    console.log(
-      {
-        companyName,jobTitle,jobDescription,file
-      }
-    )
+    if(!file) return;
+
+    handleAnalyze({companyName,jobTitle,jobDescription,file});
   }
 
   return (
